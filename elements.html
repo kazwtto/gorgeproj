@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Image Creator</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Signika:wght@300..700&display=swap');
+
+            body {
+                padding: 20px;
+                background: #282828;
+                margin: 0;
+                height: calc(100vh - 40px);
+                width: calc(100vw - 40px);
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            * {
+                color: #ccc;
+                font-family: "Signika", sans-serif;
+            }
+
+            .controls {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(3, auto);
+                gap: 10px;
+            }
+
+            .controls div {
+                padding: 10px;
+                border: 2px solid #323232;
+                border-radius: 10px;
+                display: flex;
+            }
+            
+            .controls > div:nth-child(1),
+            .controls > div:nth-child(2),
+            .controls > div:nth-child(3) {
+                flex-direction: column;
+                justify-content: center;
+                grid-column: span 1;
+                width: 100px;
+                & input {
+                    width: 80%;
+                }
+            }
+            
+            .controls > div:nth-child(4),
+            .controls > div:nth-child(5),
+            .controls > div:nth-child(6) {
+                align-items: center;
+                grid-column: span 3;
+                justify-content: space-between;
+                width: 95%;
+            }
+            
+            .controls > div:nth-child(5) {
+                flex-direction: column;
+                justify-content: center;
+                & .config {
+                    width: 100%;
+                    border: none;
+                    justify-content: space-between;
+                    & input {
+                        width: 100%;
+                    }
+                    & > div {
+                        position: relative;
+                        width: 25%;
+                        flex-direction: column;
+                        justify-content: center;
+                    }
+                }
+            }
+            
+            
+            .controls input,
+            .controls select {
+                font-size: 0.8em;
+                background: #5e43f3;
+                border-color: #382bf0;
+                border-radius: 5px;
+                padding: 2.5px;
+            }
+
+            .buttons {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                margin: 0 10px;
+                margin-top: 20px;
+                margin-bottom: 15px;
+                width: calc(100% - 20px);
+            }
+
+            .buttons button {
+                background: #5e43f3;
+                border-color: #382bf0;
+                border-radius: 15px;
+                height: 50px;
+                width: 200px;
+            }
+            
+            center {
+                height: 200px;
+                width: 100%;
+                border: 1px solid #ddd;
+                overflow: auto;
+            }
+
+            canvas {
+                display: block;
+                margin: auto;
+            }
+
+            a[href="https://tiiny.host/?ref=free-site"] {
+                display: none;
+            }
+        </style>
+    <script defer data-domain="black-ellissa-55.tiiny.site" src="https://analytics.tiiny.site/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
+    <body>
+        <div class="controls">
+            <div>
+                <label for="spacing">Spacing:</label>
+                <input type="number" id="spacing" value="10">
+            </div>
+            <div>
+                <label for="type">Type:</label>
+                <select id="type">
+                    <option value="square">Square</option>
+                    <option value="circle">Circle</option>
+                    <option value="flag">Flag</option>
+                    <option value="icon">Icon</option>
+                </select>
+            </div>
+            <div>
+                <label for="orientation">Orientation:</label>
+                <select id="orientation">
+                    <option value="horizontal">Horizontal</option>
+                    <option value="vertical">Vertical</option>
+                </select>
+            </div>
+            <div>
+                <label for="gradient">Gradient:</label>
+                <select id="gradient">
+                    <option value="disabled">Disabled</option>
+                    <option value="vertical">Vertical</option>
+                    <option value="horizontal">Horizontal</option>
+                </select>
+                <div>
+                    <input type="color" id="color1" value="#ff0000">
+                    <input type="color" id="color2" value="#0000ff">
+                </div>
+            </div>
+            <div>
+                <div class="config">
+                    <div>
+                        <label for="shadow">Shadow:</label>
+                        <input type="checkbox" id="shadow">
+                    </div>
+                    <div>
+                        <label for="shadowc">Color:</label>
+                        <input type="color" id="shadowc" value="#000000">
+                    </div>
+                    <div>
+                        <label for="opacity">Opacity:</label>
+                        <input type="range" id="opacity" value="50" min="0" max="100">
+                    </div>
+                </div>
+                <div class="config">
+                    <div>
+                        <label for="dirX">Dir X:</label>
+                        <input type="range" id="dirX" value="0" min="-100" max="100">
+                    </div>
+                    <div>
+                        <label for="dirY">Dir Y:</label>
+                        <input type="range" id="dirY" value="0" min="-100" max="100">
+                    </div>
+                    <div>
+                        <label for="blur">Blur:</label>
+                        <input type="range" id="blur" value="5" min="0" max="20">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <select id="img1"></select>
+                <select id="img2"></select>
+                <select id="img3"></select>
+                <select id="img4"></select>
+            </div>
+        </div>
+        <div class="buttons">
+            <button onclick="save()">Save as PNG</button>
+            <button onclick="zoomIn()">Zoom In 2x</button>
+        </div>
+        <center>
+            <canvas id="cnv"></canvas>
+        </center>
+        <script>
+            const [spacing, type, orientation, gradient, color1, color2, shadow, shadowc, opacity, dirX, dirY, blur, ...imgInputs] = ['spacing', 'type', 'orientation', 'gradient', 'color1', 'color2', 'shadow', 'shadowc', 'opacity', 'dirX', 'dirY', 'blur', 'img1', 'img2', 'img3', 'img4'].map(id => document.getElementById(id));
+            const cnv = document.getElementById('cnv'),
+                ctx = cnv.getContext('2d');
+            const shadowCanvas = document.createElement('canvas'),
+                shadowCtx = shadowCanvas.getContext('2d');
+
+            function saveSettings() {
+                const settings = {
+                    spacing: spacing.value,
+                    type: type.value,
+                    orientation: orientation.value,
+                    gradient: gradient.value,
+                    color1: color1.value,
+                    color2: color2.value,
+                    shadow: shadow.checked,
+                    shadowc: shadowc.value,
+                    opacity: opacity.value,
+                    dirX: dirX.value,
+                    dirY: dirY.value,
+                    blur: blur.value,
+                    images: imgInputs.map(input => input.value)
+                };
+                localStorage.setItem('settings', JSON.stringify(settings));
+            }
+
+            function loadSettings() {
+                const settings = JSON.parse(localStorage.getItem('settings'));
+                if (settings) {
+                    spacing.value = settings.spacing || 10;
+                    type.value = settings.type || 'square';
+                    orientation.value = settings.orientation || 'horizontal';
+                    gradient.value = settings.gradient || 'disabled';
+                    color1.value = settings.color1 || '#000000';
+                    color2.value = settings.color2 || '#ffffff';
+                    shadow.checked = settings.shadow || false;
+                    shadowc.value = settings.shadowc || '#000000';
+                    opacity.value = settings.opacity || 100;
+                    dirX.value = settings.dirX || 0;
+                    dirY.value = settings.dirY || 0;
+                    blur.value = settings.blur || 0;
+                    imgInputs.forEach((input, index) => {
+                        input.value = settings.images[index] || '';
+                    });
+                }
+            }
+            const options = [{
+                value: 'bt',
+                text: 'Beauty'
+            }, {
+                value: 'ch',
+                text: 'Chaos'
+            }, {
+                value: 'dr',
+                text: 'Dream'
+            }, {
+                value: 'f',
+                text: 'Flames'
+            }, {
+                value: 'p',
+                text: 'Nature'
+            }, {
+                value: 'w',
+                text: 'Sea'
+            }, {
+                value: 'wr',
+                text: 'War'
+            }, {
+                value: 'e',
+                text: 'Earth'
+            }, {
+                value: 'd',
+                text: 'Dark'
+            }, {
+                value: 'l',
+                text: 'Legendary'
+            }, {
+                value: 'm',
+                text: 'Metal'
+            }, {
+                value: 'i',
+                text: 'Ice'
+            }, {
+                value: 'el',
+                text: 'Electric'
+            }, {
+                value: 'li',
+                text: 'Light'
+            }, {
+                value: 'pr',
+                text: 'Primal'
+            }, {
+                value: 'pu',
+                text: 'Pure'
+            }, {
+                value: 'ti',
+                text: 'Time'
+            }, {
+                value: 'wd',
+                text: 'Wind'
+            }, {
+                value: 'mg',
+                text: 'Magic'
+            }, {
+                value: 'hp',
+                text: 'Happiness'
+            }, {
+                value: 'so',
+                text: 'Soul'
+            }].sort((a, b) => a.text.localeCompare(b.text));
+
+            function populateSelects() {
+                imgInputs.forEach(select => options.forEach(({
+                    value,
+                    text
+                }) => select.appendChild(new Option(text, value))));
+            }
+
+            function drawImages(ctx, imgs, spacing, orientation, width, height) {
+                ctx.clearRect(0, 0, width, height);
+                let pos = 0;
+                imgs.forEach(img => {
+                    ctx.drawImage(img, orientation === 'horizontal' ? pos : 0, orientation === 'horizontal' ? 0 : pos);
+                    pos += (orientation === 'horizontal' ? img.width : img.height) + spacing;
+                });
+            }
+
+            function updateCanvas() {
+                const space = parseInt(spacing.value),
+                    typeVal = type.value,
+                    orient = orientation.value,
+                    grad = gradient.value,
+                    startColor = color1.value,
+                    endColor = color2.value,
+                    shadowEnabled = shadow.checked,
+                    shadowColor = shadowc.value,
+                    shadowOp = parseFloat(opacity.value) / 100,
+                    shadowBlur = parseInt(blur.value),
+                    shadowDirX = parseInt(dirX.value),
+                    shadowDirY = parseInt(dirY.value),
+                    selectedImages = imgInputs.map(inp => inp.value).filter(Boolean);
+                const imgs = selectedImages.map(sigla => {
+                    const img = new Image();
+                    img.src = `images/elements/${typeVal}/${sigla}.png`;
+                    return img;
+                });
+                // Atualize esta parte no final da função 'updateCanvas'
+                Promise.all(imgs.map(img => new Promise(resolve => {
+                    img.onload = () => resolve(img);
+                    img.onerror = () => resolve(null);
+                }))).then(loadedImgs => {
+                    const validImgs = loadedImgs.filter(Boolean);
+                    if (!validImgs.length) return;
+                    let width = 0,
+                        height = 0;
+                    if (orient === 'horizontal') {
+                        width = validImgs.reduce((acc, img) => acc + img.width + space, -space) * 1.1;
+                        height = Math.max(...validImgs.map(img => img.height)) * 1.1;
+                    } else {
+                        width = Math.max(...validImgs.map(img => img.width)) * 1.1;
+                        height = validImgs.reduce((acc, img) => acc + img.height + space, -space) * 1.1;
+                    }
+                    // Adjust the size of the main and shadow canvases
+                    shadowCanvas.width = width;
+                    shadowCanvas.height = height;
+                    cnv.width = width;
+                    cnv.height = height;
+                    // Clear and draw the shadow on the shadow canvas
+                    shadowCtx.clearRect(0, 0, width, height);
+                    if (shadowEnabled) {
+                        shadowCtx.shadowColor = shadowColor;
+                        shadowCtx.shadowBlur = shadowBlur;
+                        shadowCtx.shadowOffsetX = shadowDirX;
+                        shadowCtx.shadowOffsetY = shadowDirY;
+                        shadowCtx.globalAlpha = shadowOp;
+                        shadowCtx.globalCompositeOperation = 'source-over';
+                        drawImages(shadowCtx, validImgs, space, orient, width, height);
+                    }
+                    // Clear and draw the images on the main canvas
+                    ctx.clearRect(0, 0, width, height);
+                    drawImages(ctx, validImgs, space, orient, width, height);
+                    // Apply the gradient
+                    if (grad !== 'disabled') {
+                        const grd = ctx.createLinearGradient(0, 0, grad === 'horizontal' ? width : 0, grad === 'horizontal' ? 0 : height);
+                        grd.addColorStop(0, startColor);
+                        grd.addColorStop(1, endColor);
+                        ctx.globalCompositeOperation = 'source-atop';
+                        ctx.fillStyle = grd;
+                        ctx.fillRect(0, 0, width, height);
+                        ctx.globalCompositeOperation = 'source-over';
+                    }
+                    // Draw the shadow canvas on the main canvas, below the images and gradient
+                    ctx.globalCompositeOperation = 'destination-over';
+                    ctx.drawImage(shadowCanvas, 0, 0);
+                    ctx.globalCompositeOperation = 'source-over';
+                });
+            }
+
+            function save() {
+                const link = document.createElement('a');
+                link.download = 'image.png';
+                link.href = cnv.toDataURL();
+                link.click();
+            }
+
+            function zoomIn() {
+                const zoomed = document.createElement('canvas'),
+                    ctxZoom = zoomed.getContext('2d');
+                zoomed.width = cnv.width * 2;
+                zoomed.height = cnv.height * 2;
+                ctxZoom.scale(2, 2);
+                ctxZoom.drawImage(cnv, 0, 0);
+                const link = document.createElement('a');
+                link.download = 'image_2x.png';
+                link.href = zoomed.toDataURL();
+                link.click();
+            }
+            populateSelects();
+    
+            window.onload = function() {
+                loadSettings();
+                updateCanvas();
+                
+                document.querySelector('a[href="https://tiiny.host/?ref=free-site"]')?.remove();
+            };
+
+            [...document.querySelectorAll('input, select')].forEach(el => el.addEventListener('input', () => {
+                updateCanvas();
+                saveSettings();
+            }));
+        </script>
+    </body>
+</html>
