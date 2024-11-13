@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Signika:wght@300..700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Hvip Image Generator</title>
     
     <style>
@@ -240,16 +241,25 @@
             margin-bottom: 15px;
         }
 
-        #save-image {
-            margin: 5px;
-            color: white;
-            background: red;
+        .download-btb {
+            background-color: DodgerBlue;
             border: none;
-            font-size: 1.5em;
-            width: 150px;
-            border-radius: 10px;
-            font-weight: bold;
+            color: white;
+            padding: 12px 30px;
+            cursor: pointer;
+            font-size: 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-style: bold;
+            
+            margin-top: 20px;
         }
+
+        .download-btb:hover {
+            background-color: RoyalBlue;
+        }
+    
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
@@ -301,10 +311,10 @@
     </script>
 </head>
 <body>
-    <button id="save-image" onclick="imagesDownload()">SAVE</button>
+    <button id="save-image" onclick="imagesDownload()" class="download-btb"><i class="fa fa-download"></i> Download</button>
     <main>
         <content class="overview">
-            <h3 id="name" class="y">SPIKED RHINODILLO</h3>
+            <h3 id="name" class="y">HEROIC NAME</h3>
             <span id="desc"></span>
             <div class="images">
                 <img class="rarity" src="images/rarity/H.png">
@@ -360,17 +370,15 @@
         const defaultFamily    = "extractor";
         const defaultDragonId  = 3246;
         const defaultEventId   = "heroicSpiked";
-        const defaultskillsId = [
+        const defaultskillsId  = [
             [3, "heroicspiked_soul"],
             [2, "heroicspiked_legend"]
         ];
         
+        // type:code1-type:code2
         const getSkills = (str) => {
             if (!str) return defaultskillsId;
-            // type:code1-type:code2
-            return str.split('-').forEach(item => {
-                return item.split(':');
-            });
+            return str.split('-').map(i => i.split(':'));
         }
         
         function getUrlParams() {
@@ -387,7 +395,7 @@
         const {
             dragonId, eventId, skillsId, bgId, familyId
         } = getUrlParams();
-    
+        
         // SET BACKGROUND
         $('content').each(function() {
             const image = $('<img>', {
