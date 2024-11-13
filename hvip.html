@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Signika:wght@300..700&display=swap">
+    <title>Real-time Search Filter</title>
+    
+    <style>
+        * {
+            font-family: 'Signika', sans-serif;
+            text-transform: uppercase;
+            color: white;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: #f5f5f5;
+            margin: 0;
+            overflow: auto;
+            position: relative;
+        }
+
+        main {
+            padding: 10px 0;
+            width: 400px;
+            margin: 0 auto;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            row-gap: 20px;
+        }
+        
+        mark {
+            background: none;
+        }
+
+        content {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            height: 380px;
+            width: 380px;
+        }
+
+        .background {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            height: 100%;
+            width: 100%;
+            transform: translate(-50%, -50%);
+            z-index: -2;
+        }
+
+        section.background {
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(3px);
+            min-height: 100%;
+            min-width: 100%;
+            z-index: -1;
+        }
+
+        .y {
+            color: #FFC200;
+            text-shadow: 0 0 10px rgba(0, 0, 0, .5);
+        }
+
+        .r, .highlight {
+            color: #FF5722;
+        }
+
+        #name {
+            font-size: 2em;
+        }
+
+        #desc {
+            text-align: left !important;
+            width: 70%;
+            font-size: 0.9em;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+        }
+
+        img {
+            filter: drop-shadow(0 0 5px rgba(0,0,0,.4));
+        }
+
+        content .images {
+            height: 70px;
+            width: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            position: absolute;
+            bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            & img {
+                height: 100%;
+            }
+        }
+
+        header {
+            position: absolute;
+            height: 50px;
+            width: calc(100% - 40px);
+            left: 50%;
+            transform: translateX(-50%);
+            top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            & img {
+                height: 100%;
+            }
+            & h3 {
+                font-size: 2em;
+                width: 100%;
+                text-align: right;
+            }
+        }
+
+        .item2 {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            row-gap: 10px;
+
+            & div {
+                padding: 10px;
+                border-radius: 15px;
+                background: rgba(0, 0, 0, 0.4);
+                font-size: .7em;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                row-gap: 10px;
+                position: relative;
+
+                & h4 {
+                    font-size: 20px;
+                    margin: 0;
+                    margin-bottom: 5px;
+                    width: 100%;
+                }
+                & span {
+                    font-weight: bold;
+                    font-size: 12px;
+                    text-align: left;
+                }
+                & img {
+                    height: 30px;
+                    position: absolute;
+                    right: 10px;
+                    top: 10px;
+                }
+            }
+            & section {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                height: 100%;
+                justify-content: flex-end;
+                align-items: center;
+                row-gap: 10px;
+                & div {
+                    width: 95%;
+                    & span {
+                        text-align: center;
+                    }
+                }
+            }
+        }
+
+        .emphasis {
+            color: lightgreen;
+        }
+
+        #dragon-name {
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            position: absolute;
+            top: 80px;
+            font-size: .7em;
+            font-weight: bold;
+        }
+
+        .skill-cointainer {
+            border: 1.5px solid black;
+            & span {
+                width: 100%;
+            }
+            & h4 {
+                width: 100%;
+                text-align: center;
+                & * {
+                    background: transparent;
+                }
+            }
+            &.s1 {
+                border-color: #4EAAFE;
+                & h4, mark { color: #4EAAFE };
+            }
+            &.s2 {
+                border-color: #FFA106;
+                & h4, mark { color: #FFA106 };
+            }
+            &.s3 {
+                border-left-color: #4EAAFE;
+                border-top-color: #4EAAFE;
+                border-right-color: #FFA106;
+                border-bottom-color: #FFA106;
+                & h4 {
+                    & .c1 {
+                        color: #4EAAFE;
+                    }
+                    & .c2 {
+                        color: #FFA106;
+                    }
+                }
+            }
+        }
+
+        .event h4 {
+            width: 100%;
+            text-align: center;
+        }
+
+        #skills, .margin {
+            margin-bottom: 15px;
+        }
+
+        #save-image {
+            margin: 5px;
+            color: white;
+            background: red;
+            border: none;
+            font-size: 1.5em;
+            width: 150px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $.ajax({
+            url: 'http://sp-translations.socialpointgames.com/deploy/dc/ios/prod/dc_ios_en_prod_wetd46pWuR8J5CmS.json',
+            async: false,
+            success: function(data) {
+                text = Object.assign({}, ...data);
+            }
+        });
+    
+        const elementColors = {
+            Terra: "#C2A087", Flame: "#FFA07A", Sea: "#87CEFA", Nature: "#98FB98",
+            Electric: "#FFE680", Ice: "#D0EFFF", Metal: "#C0C0C0", Dark: "#9370DB",
+            Light: "#FFFFF0", War: "#CD5C5C", Pure: "#F5F5F5", Legend: "#D8BFD8",
+            Primal: "#E3A869", Wind: "#D0EBF4", Beauty: "#FFB6C1", Magic: "#D8B0FF",
+            Chaos: "#B8A0F6", Dream: "#C2E2F9", Happy: "#FFD9E0"
+        };
+    
+        const emphasis = (string, add = " attack") => {
+            $.each(elementColors, (element, color) => {
+                string = string.replace(
+                    new RegExp(element.toLowerCase(), 'g'),
+                    `<span style="color: ${color}">${element}</span>`
+                );
+            });
+            return string;
+        };
+    
+        const splitText = (str) => {
+            const splited = String(str).split(" ");
+            const mid = Math.floor(splited.length / 2);
+            return `<mark class="c1">${splited.slice(0, mid).join(" ")}</mark> <mark class="c2">${splited.slice(mid).join(" ")}</mark>`;
+        };
+    
+        function highlightKeywords(text) {
+            const keywords = "boosted damage & life points|spiked Pit skill|boosted damage|boost overall damage & life points stats|boosted life|boosted life points|Impaling Inferno skill".toLowerCase()
+            .split("|");
+    
+            let highlightedText = (text || '').toLowerCase();
+    
+            keywords.forEach(keyword => {
+                const regex = new RegExp(keyword, 'gi');
+                highlightedText = highlightedText.replace(regex, `<span class="y">${keyword}</span>`);
+            });
+    
+            return emphasis(highlightedText, "");
+        }
+    </script>
+</head>
+<body>
+    <button id="save-image" onclick="imagesDownload()">SAVE</button>
+    <main>
+        <content class="overview">
+            <h3 id="name" class="y">SPIKED RHINODILLO</h3>
+            <span id="desc"></span>
+            <div class="images">
+                <img class="rarity" src="images/rarity/H.png">
+                <img class="family" src="">
+            </div>
+        </content>
+
+        <content class="item2 skins">
+            <span id="dragon-name"></span>
+            <header>
+                <img class="family" src="">
+                <h3 class="y">SKIN SKILL</h3>
+            </header>
+            <div>
+                <img src="images/bt-hud-events.png">
+                <h4 id="skin-1-name" class="r"></h4>
+                <span id="skin-1-desc"></span>
+            </div>
+            <div class="margin">
+                <img src="images/icon-divine-pass-elite-L.png">
+                <h4 id="skin-2-name" class="r"></h4>
+                <span id="skin-2-desc"></span>
+            </div>
+        </content>
+
+        <content class="item2 skills">
+            <span id="dragon-name"></span>
+            <header>
+                <img class="family" src="">
+                <h3 class="y">DRAGON SKILLS</h3>
+            </header>
+            <section id="skills"></section>
+        </content>
+
+        <content class="item2 event">
+            <header>
+                <img class="family" src="">
+                <h3 class="y" id="event-name"></h3>
+            </header>
+            <div>
+                <span id="teaser-desc"></span>
+            </div>
+            <div class="margin">
+                <h4 id="skins-name" class="r"></h4>
+                <span id="skins-desc"></span>
+            </div>
+        </content>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <script>
+        const defaultBg        = "default";
+        const defaultFamily    = "extractor";
+        const defaultDragonId  = 3246;
+        const defaultEventId   = "extractorSpiked";
+        const defaultskillsId = [
+            [3, "heroicspiked_soul"],
+            [2, "heroicspiked_legend"]
+        ];
+        
+        const getSkills = (str) => {
+            if (!str) return defaultskillsId;
+            // type:code1-type:code2
+            return str.split('-').forEach(item => {
+                return item.split(':');
+            });
+        }
+        
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                dragonId: params.get('dragonId') || defaultDragonId,
+                eventId: params.get('eventId') || defaultEventId,
+                skillsId: getSkills(params.get('skillsId')),
+                bgId: params.get('bgId') || defaultBg,
+                familyId: params.get('family') || defaultFamily
+            };
+        }
+        
+        const {
+            dragonId, eventId, skillsId, bgId, familyId
+        } = getUrlParams();
+    
+        // SET BACKGROUND
+        $('content').each(function() {
+            const image = $('<img>', {
+                "src": "images/bg/" + bgId + ".png",
+                class: "background"
+            })
+            const fade = $('<section>', {
+                class: "background"
+            });
+    
+            $(this).append(image, fade);
+        });
+    
+        // SET FAMILY ICON
+        $(".family").attr("src", "images/family/icon-" + familyId + ".png");
+    
+        // SET DRAGON NAME
+        $("#dragon-name").each(function() {
+            $(this).html(text[`tid_unit_${dragonId}_name`]);
+        });
+    
+        // FIRST IMAGE: OVERVIEW
+        $("#name").html(text[`tid_unit_${dragonId}_name`].replace(/ Dragon|High /g, ''));
+        $("#desc").html(emphasis(text[`tid_unit_${dragonId}_description`]));
+    
+        // SECOND IMAGE: SKINS DESCRIPTION
+        for (let i = 1; i < 3; i++) {
+            $(`#skin-${i}-name`).html(text[`tid_unit_${dragonId}_skin${i}_name`]);
+            $(`#skin-${i}-desc`).html(
+                highlightKeywords(text[`tid_unit_${dragonId}_skin${i}_description`])
+                .replace("Please restart your game for this to take effect.", '').trim()
+            );
+        }
+    
+        // THIRD IMAGE: SKILLS
+        skillsId.forEach(([type, id]) => {
+            const element = $("<div>", {
+                class: `skill-cointainer s${type}`
+            });
+            const image = $("<img>", {
+                src: `images/skillType/${type}.png`
+            });
+            const title = $("<h4>").html(splitText(text[`tid_skill_name_${id}`]));
+            const description = $("<span>").html(text[`tid_skill_description_${id}`]);
+    
+            element.append(image, title, description);
+            $("#skills").append(element);
+        });
+    
+        // FOURTH IMAGE: HEROIC EVENT
+        $("#event-name").html(text[`tid_news_${eventId}_collection_title`]);
+        $("#teaser-desc").html(text[`tid_news_${eventId}_teaser_header`]);
+        $("#skins-name").html(text[`tid_news_${eventId}_skins_title`]);
+        $("#skins-desc").html(highlightKeywords(text[`tid_news_${eventId}_skins_header`]));
+    
+        function waitForImages() {
+            return Promise.all($('img').map(function() {
+                return new Promise(resolve => {
+                    if (this.complete) resolve();
+                    else $(this).on('load', resolve);
+                });
+            }).get());
+        }
+    
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    
+        async function imagesDownload() {
+            alert('processing...');
+            const contentElements = $('content');
+    
+            await waitForImages();
+    
+            for (let index = 0; index < contentElements.length; index++) {
+                const main = contentElements.eq(index);
+                const scale = 5;
+                const width = main[0].offsetWidth * scale;
+                const height = main[0].offsetHeight * scale;
+    
+                const dataUrl = await domtoimage.toPng(main[0], {
+                    quality: 1.0,
+                    width: width,
+                    height: height,
+                    style: {
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'top left',
+                        width: `${main[0].offsetWidth}px`,
+                        height: `${main[0].offsetHeight}px`
+                    }
+                });
+    
+                const F = $("<a>").attr({
+                    href: dataUrl,
+                    download: `${eventId}_${index + 1}.png`
+                });
+                F[0].click();
+            }
+        }
+    </script>
+</body>
