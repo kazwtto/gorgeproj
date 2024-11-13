@@ -359,7 +359,7 @@
         const defaultBg        = "default";
         const defaultFamily    = "extractor";
         const defaultDragonId  = 3246;
-        const defaultEventId   = "extractorSpiked";
+        const defaultEventId   = "heroicSpiked";
         const defaultskillsId = [
             [3, "heroicspiked_soul"],
             [2, "heroicspiked_legend"]
@@ -376,7 +376,7 @@
         function getUrlParams() {
             const params = new URLSearchParams(window.location.search);
             return {
-                dragonId: params.get('dragonId') || defaultDragonId,
+                dragonId: Number(params.get('dragonId') || defaultDragonId),
                 eventId: params.get('eventId') || defaultEventId,
                 skillsId: getSkills(params.get('skillsId')),
                 bgId: params.get('bgId') || defaultBg,
